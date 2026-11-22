@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tablet">
+<meta name="theme-color" content="#16191d">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Tablet Remote</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a garage control panel, calm and legible at arm's length
+   IDEA: the tablet's own front panel: a status gauge up top, big tactile switches below
+   PICTURE: the battery/memory gauge card is the hero; everything else is controls
+   COLOUR and TYPE: workshop charcoal, safety orange accent, Space Grotesk numbers, Inter text
+   LAYOUT: one column, thumb-reachable buttons, sticky command bar at the bottom */
+:root{color-scheme:dark;--bg:#16191d;--card:#1f2328;--card2:#282d33;--line:#343a42;--ink:#f2f0ec;--muted:#9aa1a9;--acc:#ff7a1a;--ok:#3fcf8e;--bad:#ff5d5d;--warn:#ffc53d}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Inter,system-ui,sans-serif;overscroll-behavior-y:none}
+body{padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) calc(96px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+button,input,textarea{font:inherit;color:inherit}
+button{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-height:48px;cursor:pointer;font-weight:600}
+button:active{transform:scale(.98);background:#30363d}
+button.pri{background:var(--acc);border-color:var(--acc);color:#16191d}
+button.sm{min-height:40px;padding:8px 12px;border-radius:11px;font-size:14px}
+button:disabled{opacity:.5}
+input,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;min-height:48px}
+textarea{min-height:110px;font:14px/1.5 "JetBrains Mono",monospace}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+h1{font:700 28px/1.05 "Space Grotesk",sans-serif;margin:0}
+h2{font:700 19px/1.2 "Space Grotesk",sans-serif;margin:26px 2px 10px}
+.top{display:flex;align-items:center;gap:10px;margin:4px 2px 16px}
+.top .sp{flex:1}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}
+.dot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(63,207,142,.18)}
+.dot.bad{background:var(--bad)}
+.sub{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px}
+.gauge{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center}
+.bat{width:108px;height:108px;border-radius:50%;display:grid;place-items:center;position:relative}
+.bat b{font:700 30px/1 "Space Grotesk",sans-serif}
+.bat small{position:absolute;bottom:24px;font-size:11px;color:var(--muted);white-space:nowrap}
+.meter{margin:6px 0 12px}
+.meter .lab{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.meter .lab b{color:var(--ink);font-weight:600;white-space:nowrap}
+.bar{height:10px;border-radius:5px;background:var(--card2);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;border-radius:5px;background:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font-size:12px;padding:4px 9px;border-radius:99px;background:var(--card2);color:var(--muted);white-space:nowrap}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.act{display:grid;gap:2px;text-align:left;padding:14px;min-height:76px;border-radius:18px}
+.act span{font-size:22px;line-height:1}
+.act small{font-weight:400;color:var(--muted);font-size:13px}
+.app{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.app:first-child{border-top:0;padding-top:0}
+.app .nm{flex:1}
+.app .nm small{display:block;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app .btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.job{margin-top:10px}
+.job .hd{display:flex;gap:8px;align-items:center;font-weight:600}
+.job .hd .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:"JetBrains Mono",monospace;font-size:14px}
+.steps{display:flex;gap:6px;margin:10px 0 0;font-size:12px;color:var(--muted)}
+.steps span{flex:1;padding:6px;border-radius:8px;background:var(--card2);text-align:center}
+.steps span.on{background:rgba(255,122,26,.18);color:var(--acc)}
+.steps span.done{background:rgba(63,207,142,.15);color:var(--ok)}
+pre{margin:10px 0 0;background:var(--bg);border-radius:12px;padding:12px;font:13px/1.5 "JetBrains Mono",monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;color:#d9dde2}
+.hist{display:flex;align-items:center;gap:10px;padding:12px 2px;border-top:1px solid var(--line);width:100%;background:none;border-radius:0;border-left:0;border-right:0;border-bottom:0;text-align:left;min-height:54px;font-weight:400}
+.hist .t{flex:1;font:14px "JetBrains Mono",monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist time{color:var(--muted);font-size:13px;white-space:nowrap}
+.ico{width:22px;text-align:center;flex:none}
+.bottom{position:fixed;left:0;right:0;bottom:0;padding:10px max(14px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:rgba(22,25,29,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+.bottom form{display:flex;gap:8px}
+.bottom form input{flex:1;font-family:"JetBrains Mono",monospace;font-size:16px}
+.bottom .tog{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:14px;color:var(--muted)}
+.setup{display:grid;gap:14px;max-width:520px;margin:30px auto}
+.setup ol{margin:0;padding-left:22px;display:grid;gap:8px;color:#d9dde2}
+.setup a{color:var(--acc)}
+.err{color:var(--bad);font-size:14px}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);display:grid;align-items:end;z-index:9}
+.sheet .card{border-radius:22px 22px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));display:grid;gap:12px}
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--card2);border:1px solid var(--line);padding:10px 16px;border-radius:12px;z-index:10;font-size:14px;max-width:90vw}
+@media (prefers-reduced-motion:no-preference){.spin{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+{
+const OWNER='Frogemon', DEFAULT_REPO='Frogemon/tablet-control';
+const KNOWN=[
+  {name:'Swiss Trip',repo:'Frogemon/switzerland-trip-planner',pkg:'com.frogemon.swisstrip',build:'android-app.yml'},
+  {name:'App Studio',repo:'Frogemon/tablet-control',pkg:'com.frogemon.studio',build:'studio-app.yml'}];
+const FREE_MEM=`before=$(adb shell cat /proc/meminfo | awk '/MemAvailable/{print int($2/1024)}')
+for p in com.spotify.music org.mozilla.firefox com.softwinner.camera2 io.github.frogemon.chairtool com.frogemon.studio com.google.android.go.documentsui com.google.android.apps.nbu.files; do adb shell am force-stop $p; done
+sleep 2
+after=$(adb shell cat /proc/meminfo | awk '/MemAvailable/{print int($2/1024)}')
+echo "Free memory: $before MB → $after MB"`;
+const ACTIONS=[
+  {i:'🧹',t:'Free memory',s:'Close Spotify, Firefox, etc.',title:'script',body:FREE_MEM},
+  {i:'☀️',t:'Wake screen',s:'Turn the display on',title:'adb shell input keyevent KEYCODE_WAKEUP'},
+  {i:'⏱',t:'Screen 10 min',s:'Sleep after 10 minutes',title:'adb shell settings put system screen_off_timeout 600000'},
+  {i:'🔆',t:'Always on',s:'Screen never sleeps',title:'adb shell settings put system screen_off_timeout 2147483647'},
+  {i:'🏠',t:'Home',s:'Go to Mint Home',title:'adb shell input keyevent KEYCODE_HOME'},
+  {i:'⬇️',t:'Update agent',s:'Pull the newest tablet code',title:'update'},
+  {i:'📋',t:'Installed apps',s:'List your apps',title:'apps'},
+  {i:'🔁',t:'Restart tablet',s:'Takes ~1 min to come back',title:'adb reboot',confirm:'Restart the tablet? Shizuku has to start on boot for commands to keep working.'}];
+
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const S={token:LS.get('token',''),repo:LS.get('repo',DEFAULT_REPO),status:LS.get('status',null),jobs:[],hist:[],open:{},script:false,lastSeen:LS.get('lastSeen',0)};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ago=t=>{if(!t)return 'never';const s=(Date.now()-t)/1000;if(s<60)return 'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';return new Date(t).toLocaleDateString();};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2800);}
+
+async function gh(method,path,body){
+  const r=await fetch('https://api.github.com'+path,{method,cache:'no-store',headers:Object.assign({Authorization:'Bearer '+S.token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},body?{'Content-Type':'application/json'}:{}),body:body?JSON.stringify(body):undefined});
+  if(r.status===204)return null;
+  const j=await r.json().catch(()=>null);
+  if(!r.ok){const e=new Error((j&&j.message)||('HTTP '+r.status));e.status=r.status;throw e;}
+  return j;
+}
+function parseResult(body){
+  const m=/^(✅|❌) exit (\d+)[^\n]*\n```\n?([\s\S]*?)\n?```/.exec(body||'');
+  return m?{ok:m[1]==='✅',code:+m[2],out:m[3]}:{ok:true,code:0,out:body||''};
+}
+
+/* ---------- running commands ---------- */
+async function run(title,body,opts){
+  opts=opts||{};
+  const job={title,label:opts.label||title,state:'sending',out:'',ok:null,hidden:!!opts.hidden,t:Date.now()};
+  if(!job.hidden){S.jobs.unshift(job);S.jobs=S.jobs.slice(0,3);draw();}
+  try{
+    const iss=await gh('POST','/repos/'+S.repo+'/issues',{title,body:body||'Sent from Tablet Remote'});
+    job.n=iss.number;job.state='sent';draw();
+    const until=Date.now()+(opts.long?40*60e3:10*60e3);
+    while(Date.now()<until){
+      await sleep(document.hidden?8000:3000);
+      const is=await gh('GET','/repos/'+S.repo+'/issues/'+job.n);
+      if(job.state==='sent'&&is.reactions&&is.reactions.eyes>0){job.state='running';draw();}
+      if(is.comments>0){
+        const cs=await gh('GET','/repos/'+S.repo+'/issues/'+job.n+'/comments?per_page=100');
+        const r=parseResult(cs[cs.length-1].body);
+        Object.assign(job,{state:'done',ok:r.ok,out:r.out,code:r.code});
+        S.lastSeen=Date.now();LS.set('lastSeen',S.lastSeen);
+        draw();loadHistory();return job;
+      }
+    }
+    job.state='done';job.ok=false;job.out='No answer from the tablet yet. Is it on Wi-Fi with Termux and Shizuku running?\nIt will still run the command when it comes back.';draw();
+  }catch(e){job.state='done';job.ok=false;job.out='Couldn’t send: '+e.message;draw();}
+  return job;
+}
+async function refreshStatus(){
+  S.statusBusy=true;draw();
+  const j=await run('status-json','',{hidden:true});
+  S.statusBusy=false;
+  if(j.ok){try{S.status=Object.assign(JSON.parse(j.out),{at:Date.now()});LS.set('status',S.status);}catch(e){toast('Tablet sent an odd status. Try “Update agent”.');}}
+  else toast(j.out.split('\n')[0]);
+  draw();
+}
+async function loadHistory(){
+  try{
+    const list=await gh('GET','/repos/'+S.repo+'/issues?state=all&creator='+OWNER+'&per_page=25&sort=created&direction=desc');
+    S.hist=list.filter(i=>!i.pull_request&&i.title!=='status-json');
+    const lastClosed=list.find(i=>i.closed_at);if(lastClosed){const t=Date.parse(lastClosed.closed_at);if(t>S.lastSeen){S.lastSeen=t;LS.set('lastSeen',t);}}
+    draw();
+  }catch(e){if(e.status===401){S.token='';LS.set('token','');draw();}}
+}
+async function openHist(n){
+  if(S.open[n]){delete S.open[n];draw();return;}
+  S.open[n]={loading:true};draw();
+  try{const cs=await gh('GET','/repos/'+S.repo+'/issues/'+n+'/comments?per_page=100');
+    S.open[n]=cs.length?parseResult(cs[cs.length-1].body):{out:'(waiting for the tablet…)'};}
+  catch(e){S.open[n]={out:e.message};}
+  draw();
+}
+
+/* ---------- views ---------- */
+function setupView(){
+  return '<div class="setup"><h1>Tablet Remote</h1><p class="sub">Control the garage tablet from anywhere. One-time setup:</p>'+
+  '<div class="card"><ol><li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub → new fine-grained token</a>.</li>'+
+  '<li>Name it “Tablet Remote”, expiration up to you.</li><li><b>Repository access:</b> Only select repositories → <b>tablet-control</b>.</li>'+
+  '<li><b>Permissions → Issues:</b> Read and write. Nothing else.</li><li>Generate, copy it, paste it here.</li></ol></div>'+
+  '<form id="tokForm" class="setup" style="margin:0"><input id="tok" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="err" id="tokErr"></div><button class="pri">Connect</button></form>'+
+  '<p class="sub">The key stays on this phone. Then tap Share → Add to Home Screen.</p></div>';
+}
+function statusCard(){
+  const st=S.status;
+  if(!st)return '<div class="card"><p class="sub" style="margin:0 0 12px">No status yet.</p><button class="pri" data-status>'+(S.statusBusy?'<span class="spin">◌</span> Asking the tablet…':'Check the tablet')+'</button></div>';
+  const memUsed=st.memTotalKB?1-st.memAvailKB/st.memTotalKB:0, disk=st.diskTotalKB?1-st.diskFreeKB/st.diskTotalKB:0;
+  const b=st.battery==null?0:st.battery, bc=b<20?'var(--bad)':b<40?'var(--warn)':'var(--ok)';
+  return '<div class="card"><div class="gauge"><div class="bat" style="background:conic-gradient('+bc+' '+b*3.6+'deg,var(--card2) 0)"><div style="position:absolute;inset:9px;border-radius:50%;background:var(--card)"></div><b style="position:relative;margin-top:-10px">'+(st.battery==null?'–':b+'%')+'</b><small style="position:absolute">'+(st.charging?'⚡ charging':'battery')+'</small></div><div>'+
+    '<div class="meter"><div class="lab">Memory<b>'+Math.round(st.memAvailKB/1024)+' MB free</b></div><div class="bar"><i style="width:'+Math.round(memUsed*100)+'%"></i></div></div>'+
+    '<div class="meter"><div class="lab">Storage<b>'+(st.diskFreeKB/1048576).toFixed(1)+' GB free</b></div><div class="bar"><i style="width:'+Math.round(disk*100)+'%;background:#6c8cff"></i></div></div>'+
+    '</div></div><div class="chips"><span class="chip">'+esc(st.model||'Tablet')+' · Android '+esc(st.android)+'</span><span class="chip">'+(st.adb==='none'?'⚠️ no ADB rights':'ADB via '+st.adb)+'</span><span class="chip">'+esc((st.uptime||'').replace('up ','up '))+'</span><span class="chip">checked '+ago(st.at)+'</span></div>'+
+    (st.adb==='none'?'<p class="err">Shizuku isn’t running, so settings and installs won’t work. On the tablet: Wireless debugging on, then Shizuku → Start.</p>':'')+
+    '<button class="sm" style="margin-top:12px;width:100%" data-status>'+(S.statusBusy?'<span class="spin">◌</span> Checking…':'↻ Refresh')+'</button></div>';
+}
+function jobView(j){
+  const steps=['Sent','Tablet picked it up','Done'],idx={sending:-1,sent:0,running:1,done:2}[j.state];
+  return '<div class="card job"><div class="hd"><span class="ico">'+(j.state!=='done'?'<span class="spin">◌</span>':j.ok?'✅':'❌')+'</span><span class="t">'+esc(j.label)+'</span><button class="sm" data-dismiss="'+j.t+'">✕</button></div>'+
+    (j.state!=='done'?'<div class="steps">'+steps.map((s,i)=>'<span class="'+(i<idx?'done':i===idx+1?'on':i<=idx?'done':'')+'">'+s+'</span>').join('')+'</div><p class="sub" style="margin:8px 0 0">The tablet checks every 15 seconds.</p>':'')+
+    (j.out?'<pre>'+esc(j.out)+'</pre>':'')+'</div>';
+}
+function appsCard(){
+  const watching=(S.status&&S.status.watching)||[],apps=appsList();
+  return '<div class="card">'+apps.map((a,i)=>'<div class="app"><div class="nm"><b>'+esc(a.name)+'</b><small>'+esc(a.repo)+(watching.includes(a.repo)?' · auto-updates':'')+'</small></div><div class="btns">'+
+    (a.pkg?'<button class="sm" data-app="open" data-i="'+i+'">Open</button>':'')+'<button class="sm" data-app="install" data-i="'+i+'">Install</button><button class="sm" data-app="build" data-i="'+i+'">Build</button></div></div>').join('')+'</div>';
+}
+function draw(){
+  const app=$('#app');
+  if(!S.token){app.innerHTML=setupView();$('.bottom')&&$('.bottom').remove();bindSetup();return;}
+  const online=S.lastSeen&&Date.now()-S.lastSeen<30*60e3;
+  app.innerHTML='<div class="top"><span class="dot '+(online?'ok':'')+'"></span><div><h1>Garage Tablet</h1><div class="sub">last answered '+ago(S.lastSeen)+'</div></div><span class="sp"></span><button class="sm" id="gear" aria-label="Settings">⚙︎</button></div>'+
+    statusCard()+
+    S.jobs.map(jobView).join('')+
+    '<h2>Quick actions</h2><div class="grid">'+ACTIONS.map((a,i)=>'<button class="act" data-act="'+i+'"><span>'+a.i+'</span>'+esc(a.t)+'<small>'+esc(a.s)+'</small></button>').join('')+'</div>'+
+    '<h2>Apps</h2>'+appsCard()+
+    '<h2>History</h2><div class="card" style="padding:4px 14px">'+(S.hist.length?S.hist.map(h=>{
+      const lab=(h.labels||[]).map(l=>l.name),ic=h.state==='open'?'<span class="spin">◌</span>':lab.includes('failed')?'❌':'✅',o=S.open[h.number];
+      return '<button class="hist" data-hist="'+h.number+'"><span class="ico">'+ic+'</span><span class="t">'+esc(h.title)+'</span><time>'+ago(Date.parse(h.created_at))+'</time></button>'+
+        (o?'<pre style="margin:0 0 12px">'+(o.loading?'Loading…':esc(o.out))+'</pre>':'');}).join(''):'<p class="sub">Nothing yet.</p>')+'</div>';
+  if(!$('.bottom')){const b=document.createElement('div');b.className='bottom';b.innerHTML=
+    '<label class="tog"><input type="checkbox" id="scriptTog" style="width:20px;min-height:0;height:20px;accent-color:var(--acc)"> Multi-line script</label>'+
+    '<form id="cmdForm"><input id="cmd" placeholder="adb shell …" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="pri" style="flex:none">Run</button></form>';
+    document.body.appendChild(b);bindBottom();}
+}
+function bindSetup(){
+  $('#tokForm').onsubmit=async e=>{e.preventDefault();const t=$('#tok').value.trim();if(!t)return;S.token=t;
+    try{await gh('GET','/repos/'+S.repo);LS.set('token',t);draw();loadHistory();refreshStatus();}
+    catch(er){S.token='';$('#tokErr').textContent='That key didn’t work: '+er.message+'. Check it can see tablet-control.';}};
+}
+function bindBottom(){
+  $('#scriptTog').onchange=e=>{S.script=e.target.checked;const f=$('#cmdForm'),cur=$('#cmd').value;
+    f.innerHTML=S.script?'<textarea id="cmd" placeholder="adb shell settings put …&#10;adb shell am force-stop …" autocapitalize="off" spellcheck="false" style="flex:1"></textarea><button class="pri" style="flex:none;align-self:end">Run</button>':
+      '<input id="cmd" placeholder="adb shell …" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="pri" style="flex:none">Run</button>';$('#cmd').value=cur;};
+  $('#cmdForm').onsubmit=e=>{e.preventDefault();const v=$('#cmd').value.trim();if(!v)return;$('#cmd').value='';$('#cmd').blur();
+    if(S.script)run('script',v,{label:v.split('\n')[0]+(v.includes('\n')?' …':''),long:true});else run(v,'',{long:/^(build|local)\b/.test(v)});window.scrollTo({top:0,behavior:'smooth'});};
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.hasAttribute('data-status')){if(!S.statusBusy)refreshStatus();return;}
+  if(b.dataset.dismiss){S.jobs=S.jobs.filter(j=>String(j.t)!==b.dataset.dismiss);draw();return;}
+  if(b.dataset.act){const a=ACTIONS[+b.dataset.act];if(a.confirm&&!confirm(a.confirm))return;run(a.title,a.body,{label:a.t});window.scrollTo({top:0,behavior:'smooth'});return;}
+  if(b.dataset.app){const all=appsList(),a=all[+b.dataset.i],k=b.dataset.app;
+    if(k==='open')run('adb shell monkey -p '+a.pkg+' -c android.intent.category.LAUNCHER 1','',{label:'Open '+a.name});
+    if(k==='install')run('install '+a.repo,'',{label:'Install '+a.name});
+    if(k==='build')run('build '+a.repo+' '+a.build,'',{label:'Build '+a.name+' (a few minutes)',long:true});
+    window.scrollTo({top:0,behavior:'smooth'});return;}
+  if(b.dataset.hist){openHist(+b.dataset.hist);return;}
+  if(b.id==='gear'){const sh=document.createElement('div');sh.className='sheet';sh.innerHTML='<div class="card"><h1 style="font-size:22px">Settings</h1><label class="sub">Command repo<input id="repoIn" value="'+esc(S.repo)+'"></label><button id="saveRepo">Save</button><button id="signOut" style="color:var(--bad)">Forget GitHub key</button><button id="closeSh">Close</button></div>';
+    document.body.appendChild(sh);sh.onclick=ev=>{if(ev.target===sh||ev.target.id==='closeSh')sh.remove();};
+    $('#saveRepo').onclick=()=>{S.repo=$('#repoIn').value.trim()||DEFAULT_REPO;LS.set('repo',S.repo);sh.remove();loadHistory();};
+    $('#signOut').onclick=()=>{S.token='';LS.set('token','');sh.remove();draw();};}
+});
+function appsList(){const watching=(S.status&&S.status.watching)||[],apps=KNOWN.slice();
+  watching.forEach(r=>{if(!apps.some(a=>a.repo===r))apps.push({name:r.split('/')[1],repo:r,build:'android-app.yml'});});return apps;}
+
+draw();
+if(S.token){loadHistory();if(!S.status||Date.now()-S.status.at>10*60e3)refreshStatus();}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.token)loadHistory();});
+setInterval(()=>{if(!document.hidden&&S.token)loadHistory();},30000);
+}
+</script>
+</body>
+</html>
