@@ -95,7 +95,9 @@ pre{margin:10px 0 0;background:var(--bg);border-radius:12px;padding:12px;font:13
 const OWNER='Frogemon', DEFAULT_REPO='Frogemon/tablet-control';
 const KNOWN=[
   {name:'Swiss Trip',repo:'Frogemon/switzerland-trip-planner',pkg:'com.frogemon.swisstrip',build:'android-app.yml'},
-  {name:'App Studio',repo:'Frogemon/tablet-control',pkg:'com.frogemon.studio',build:'studio-app.yml'}];
+  {name:'App Studio',repo:'Frogemon/tablet-control',pkg:'com.frogemon.studio',build:'studio-app.yml'},
+  {name:'Shop Tools',repo:'Frogemon/shop-tools',pkg:'com.frogemon.shoptools',build:'android-app.yml'},
+  {name:'Mint Home',repo:'Frogemon/mint-home',pkg:'io.github.frogemon.minthome',build:'build.yml'}];
 const FREE_MEM=`before=$(adb shell cat /proc/meminfo | awk '/MemAvailable/{print int($2/1024)}')
 for p in com.spotify.music org.mozilla.firefox com.softwinner.camera2 io.github.frogemon.chairtool com.frogemon.studio com.google.android.go.documentsui com.google.android.apps.nbu.files; do adb shell am force-stop $p; done
 sleep 2
