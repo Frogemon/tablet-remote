@@ -105,6 +105,7 @@ after=$(adb shell cat /proc/meminfo | awk '/MemAvailable/{print int($2/1024)}')
 echo "Free memory: $before MB → $after MB"`;
 const ACTIONS=[
   {i:'🧹',t:'Free memory',s:'Close Spotify, Firefox, etc.',title:'script',body:FREE_MEM},
+  {i:'💻',t:'Wake PC',s:'Turn on the computer',title:'wake-pc'},
   {i:'☀️',t:'Wake screen',s:'Turn the display on',title:'adb shell input keyevent KEYCODE_WAKEUP'},
   {i:'⏱',t:'Screen 10 min',s:'Sleep after 10 minutes',title:'adb shell settings put system screen_off_timeout 600000'},
   {i:'🔆',t:'Always on',s:'Screen never sleeps',title:'adb shell settings put system screen_off_timeout 2147483647'},
